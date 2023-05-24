@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>What They Said</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/tabulator-tables/dist/css/tabulator.min.css">
+    <style>
+        .tabulator-cell {
+            white-space: normal;
+        }
+    </style>
+    <link href="https://unpkg.com/tabulator-tables@4.1.4/dist/css/tabulator.min.css" rel="stylesheet">
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables@4.1.4/dist/js/tabulator.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+</head>
+<body>
+    <h1>What They Said</h1>
+  <div id="table" class="table-container"></div>
+
+  <script>
+      function link(cell, formatterParams) {
+          var url = cell.getValue();
+          if (url!=="") {
+              return "<a target='blank' href='" + encodeURI(url) + "'>source</a>";
+          }else {
+              return "";
+          }
+      
+      }
+      function testFormatter(cell, formatterParams) {
+          var rag = cell.getValue();
+          if (rag === "R") {
+              cell.getElement().style.backgroundColor = "#D2222D";
+              cell.getElement().style.color = "#D2222D";
+          }
+          if (rag === "A") {
+              cell.getElement().style.backgroundColor = "#FFBF00";
+              cell.getElement().style.color = "#FFBF00";
+          }
+          if (rag === "G") {
+              cell.getElement().style.backgroundColor = "#238823";
+              cell.getElement().style.color = "#238823";
+          }
+
+          return rag
+      }
+    document.addEventListener('DOMContentLoaded', function() {
+      fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vQevVvaKdzl2uisbvzhytaHk9yqk9yscUJHZIDlykzeDl8R49J4l7vBK21kjKFJKVod097yOY8ecw_a/pub?gid=1437891341&single=true&output=csv')
+        .then(function(response) {
+          return response.text();
+        })
+        .then(function(data) {
+          // Parse CSV into array of objects
+          var parsedData = Papa.parse(data, { header: true }).data;
+
+          // Transform data to array of arrays
+          var dataArray = parsedData.map(function(row) {
+            return Object.values(row);
+          });
+
+          var table = new Tabulator("#table", {
+            data: dataArray,
+            layout: "fitDataFill",
+            resizableColumns: true,
+            resizableRows: true,
+              autoColumns: false,
+              headerFilterPlaceholder: "",
+            columns: [
+ 
+                    { title: "Sector", field: "0", headerFilter: true, formatter: "textarea", width: 100 },
+                    { title: "Area", field: "1", headerFilter: true, formatter: "textarea", width: 100 },
+                    { title: "Sage", field: "2", headerFilter: true, formatter: "textarea", width: 100 },
+                    { title: "As At", field: "3", headerFilter: true, formatter: "textarea", width: 90 },
+                    { title: "", field: "4", headerFilter: true, formatter: link, width: 60 },
+                    { title: "Forecast", field: "5", headerFilter: true, formatter: "textarea", width:200 },
+                    { title: "", field: "6", headerFilter: true, formatter: link, width: 60 },
+                    { title: "Outcome", field: "7", headerFilter: true, formatter: "textarea", width: 200 },
+                { title: "RAG", field: "8", headerFilter: true, formatter: testFormatter, width: 50 },
+                    { title: "Commentary", field: "9", headerFilter: true, formatter: "textarea", width: 110 }
+               
+            ]
+          });
+        })
+        .catch(function(error) {
+          console.log('Error:', error);
+        });
+    });
+  </script>
+</body>
+</html>
